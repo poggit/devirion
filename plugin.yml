@@ -1,0 +1,6 @@
+name: devirion
+author: poggit
+authors: [SOFe]
+main: poggit\virion\devirion\Devirion
+version: 1.0.0
+api: [2.0.0]
