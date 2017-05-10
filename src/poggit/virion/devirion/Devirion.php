@@ -68,15 +68,15 @@ class Devirion extends PluginBase{
 					continue;
 				}
 				$version = $data["version"];
-				if(!isset($data["species"])){
-					$this->getLogger()->error("Cannot load virion: Attribute 'species' missing in {$path}virion.yml");
+				if(!isset($data["antigen"])){
+					$this->getLogger()->error("Cannot load virion: Attribute 'antigen' missing in {$path}virion.yml");
 					continue;
 				}
-				$species = $data["species"];
+				$antigen = $data["antigen"];
 
 				$this->getLogger()->info("Loading virion $name v$version by " . implode(", ", $authors));
 
-				$this->classLoader->addSpecies($species, $path);
+				$this->classLoader->addAntigen($antigen, $path);
 				$loaded = true;
 			}
 

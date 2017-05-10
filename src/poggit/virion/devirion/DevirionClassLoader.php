@@ -20,25 +20,36 @@
 
 namespace poggit\virion\devirion;
 
-use pocketmine\CompatibleClassLoader;
-
-class DevirionClassLoader extends CompatibleClassLoader{
-	private $speciesMap = [];
+class DevirionClassLoader extends \BaseClassLoader{
+	private $antigenMap = [];
 	private $mappedClasses = [];
 
-	public function addSpecies(string $species, string $path){
-		$this->speciesMap[$path] = $species;
+	public function addAntigen(string $antigen, string $path){
+		$this->antigenMap[$path] = $antigen;
 	}
 
 	public function findClass($class){
-		foreach($this->speciesMap as $path => $species){
-			if(substr(strtolower($class), 0, strlen($species)) === strtolower($species)){
-				$this->mappedClasses[$class] = $path;
+		$components = explode("\\", $class);
+		$baseName = implode(DIRECTORY_SEPARATOR, $components);
+		foreach($this->antigenMap as $path => $antigen){
+			if(substr(strtolower($class), 0, strlen($antigen)) === strtolower($antigen)){
+
+				if(PHP_INT_SIZE === 8 and file_exists($path . DIRECTORY_SEPARATOR . $baseName . "__64bit.php")){
+					$this->mappedClasses[$class] = $antigen;
+					return $path . DIRECTORY_SEPARATOR . $baseName . "__64bit.php";
+				}elseif(PHP_INT_SIZE === 4 and file_exists($path . DIRECTORY_SEPARATOR . $baseName . "__32bit.php")){
+					$this->mappedClasses[$class] = $antigen;
+					return $path . DIRECTORY_SEPARATOR . $baseName . "__32bit.php";
+				}elseif(file_exists($path . DIRECTORY_SEPARATOR . $baseName . ".php")){
+					$this->mappedClasses[$class] = $antigen;
+					return $path . DIRECTORY_SEPARATOR . $baseName . ".php";
+				}
 			}
 		}
+		return null;
 	}
 
-	public function findSpecies(string $loadedClass){
+	public function getSourceViralAntigen(string $loadedClass){
 		return $this->mappedClasses[$loadedClass] ?? null;
 	}
 }
