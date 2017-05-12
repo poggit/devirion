@@ -20,7 +20,7 @@
 
 namespace poggit\virion\devirion;
 
-class DevirionClassLoader extends \BaseClassLoader{
+class VirionClassLoader extends \BaseClassLoader{
 	private $antigenMap = [];
 	private $mappedClasses = [];
 

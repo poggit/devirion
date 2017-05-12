@@ -26,8 +26,8 @@ class Devirion extends PluginBase{
 	private $classLoader;
 
 	public function onEnable(){
-		$this->classLoader = new DevirionClassLoader($this->getServer()->getLoader());
-		$dir = $this->getServer()->getDataPath() . "libs/";
+		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
+		$dir = $this->getServer()->getDataPath() . "virions/";
 
 		if(is_dir($dir)){
 			$directory = dir($dir);
