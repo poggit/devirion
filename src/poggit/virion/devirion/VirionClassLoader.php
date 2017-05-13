@@ -23,13 +23,6 @@ namespace poggit\virion\devirion;
 class VirionClassLoader extends \BaseClassLoader{
 	private $antigenMap = [];
 	private $mappedClasses = [];
-	/** @var DEVirion */
-	private $main;
-
-	public function init(DEVirion $main) : VirionClassLoader{
-		$this->main = $main;
-		return $this;
-	}
 
 	public function addAntigen(string $antigen, string $path){
 		$this->antigenMap[$path] = $antigen;
@@ -55,7 +48,7 @@ class VirionClassLoader extends \BaseClassLoader{
 					return $path . DIRECTORY_SEPARATOR . $baseName . ".php";
 				}
 			}else{
-				$this->main->getLogger()->warning("DEVirion detected an attempt to load class $class, matching a known antigen but does not exist. Please note that this reference might be shaded in virion building and may fail to load.");
+				echo "DEVirion detected an attempt to load class $class, matching a known antigen but does not exist. Please note that this reference might be shaded in virion building and may fail to load.\n";
 			}
 		}
 		return null;

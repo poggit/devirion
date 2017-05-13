@@ -27,7 +27,7 @@ class DEVirion extends PluginBase{
 	private $classLoader;
 
 	public function onEnable(){
-		$this->classLoader = (new VirionClassLoader($this->getServer()->getLoader()))->init($this);
+		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
 		$dir = $this->getServer()->getDataPath() . "virions/";
 
 		if(is_dir($dir)){
