@@ -86,17 +86,74 @@ class DEVirion extends PluginBase{
 			$authors = array_merge($authors, (array) $data["authors"]);
 		}
 		if(!isset($data["version"])){
-			$this->getLogger()->error("Cannot load virion: Attribute 'version' missing in {$path}virion.yml");
+			$this->getLogger()->error("Cannot load virion $name: Attribute 'version' missing in {$path}virion.yml");
 			return;
 		}
-		$version = $data["version"];
+		$virionVersion = $data["version"];
 		if(!isset($data["antigen"])){
-			$this->getLogger()->error("Cannot load virion: Attribute 'antigen' missing in {$path}virion.yml");
+			$this->getLogger()->error("Cannot load virion $name: Attribute 'antigen' missing in {$path}virion.yml");
 			return;
 		}
+		if(isset($data["php"])){
+			foreach((array) $data["php"] as $php){
+				$parts = array_map("intval", array_pad(explode(".", $php), 2, "0"));
+				if($parts[0] !== PHP_MAJOR_VERSION){
+					continue;
+				}
+				if($parts[1] <= PHP_MINOR_VERSION){
+					$ok = true;
+					break;
+				}
+			}
+			if(!isset($ok) and count((array) $data["php"]) > 0){
+				$this->getLogger()->error("Cannot load virion $name: Server is using incompatible PHP version " . PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION);
+				return;
+			}
+		}
+		if(isset($data["api"])){
+			$compatible = false;
+			foreach((array) $data["api"] as $version){
+				//Format: majorVersion.minorVersion.patch (3.0.0)
+				//    or: majorVersion.minorVersion.patch-devBuild (3.0.0-alpha1)
+				if($version !== $this->getServer()->getApiVersion()){
+					$virionApi = array_pad(explode("-", $version), 2, ""); //0 = version, 1 = suffix (optional)
+					$serverApi = array_pad(explode("-", $this->getServer()->getApiVersion()), 2, "");
+
+					if(strtoupper($virionApi[1]) !== strtoupper($serverApi[1])){ //Different release phase (alpha vs. beta) or phase build (alpha.1 vs alpha.2)
+						continue;
+					}
+
+					$virionNumbers = array_map("intval", explode(".", $virionApi[0]));
+					$serverNumbers = array_map("intval", explode(".", $serverApi[0]));
+
+					if($virionNumbers[0] !== $serverNumbers[0]){ //Completely different API version
+						continue;
+					}
+
+					if($virionNumbers[1] > $serverNumbers[1]){ //If the plugin requires new API features, being backwards compatible
+						continue;
+					}
+				}
+
+				$compatible = true;
+				break;
+			}
+
+			if($compatible === false){
+				$this->getLogger()->error("Cannot load virion $name: Server has incompatible API version {$this->getServer()->getApiVersion()}");
+				return;
+
+			}
+		}
+
+		if(!isset($data["api"]) && !isset($data["php"])){
+			$this->getLogger()->error("Cannot load virion $name: Either 'api' or 'php' attribute must be declared in {$path}virion.yml");
+			return;
+		}
+
 		$antigen = $data["antigen"];
 
-		$this->getLogger()->info("Loading virion $name v$version by " . implode(", ", $authors) . " (antigen: $antigen)");
+		$this->getLogger()->info("Loading virion $name v$virionVersion by " . implode(", ", $authors) . " (antigen: $antigen)");
 
 		$this->classLoader->addAntigen($antigen, $path . "src/");
 	}
