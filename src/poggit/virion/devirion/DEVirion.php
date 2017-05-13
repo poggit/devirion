@@ -21,16 +21,17 @@
 namespace poggit\virion\devirion;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\PluginTask;
 
 class DEVirion extends PluginBase{
 	/** @var VirionClassLoader */
 	private $classLoader;
 
 	public function onEnable(){
-		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
 		$dir = $this->getServer()->getDataPath() . "virions/";
 
 		if(is_dir($dir)){
+			$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
 			$directory = dir($dir);
 			while(is_string($file = $directory->read())){
 				if(is_dir($dir . $file) and $file !== "." and $file !== ".."){
@@ -48,6 +49,17 @@ class DEVirion extends PluginBase{
 
 		if(count($this->classLoader->getKnownAntigens()) > 0){
 			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DeVirion on production servers!!");
+			$this->classLoader->register(true);
+			$this->getServer()->getScheduler()->scheduleRepeatingTask(new class($this) extends PluginTask{
+				public function onRun($currentTick){
+					/** @var DEVirion $owner */
+					$owner = $this->getOwner();
+					$messages = $owner->getVirionClassLoader()->getMessages();
+					while($messages->count() > 0){
+						$owner->getLogger()->warning($messages->shift());
+					}
+				}
+			}, 1);
 		}
 	}
 
@@ -56,7 +68,7 @@ class DEVirion extends PluginBase{
 //			$this->getLogger()->error("Cannot load virion: .poggit.yml missing");
 			return;
 		}
-		$data = yaml_parse_file($path . "virion.yml");
+		$data = yaml_parse(file_get_contents($path . "virion.yml"));
 		if(!is_array($data)){
 			$this->getLogger()->error("Cannot load virion: Error parsing {$path}virion.yml");
 			return;
@@ -86,6 +98,10 @@ class DEVirion extends PluginBase{
 
 		$this->getLogger()->info("Loading virion $name v$version by " . implode(", ", $authors) . " (antigen: $antigen)");
 
-		$this->classLoader->addAntigen($antigen, $path);
+		$this->classLoader->addAntigen($antigen, $path . "src/");
+	}
+
+	public function getVirionClassLoader() : VirionClassLoader{
+		return $this->classLoader;
 	}
 }
