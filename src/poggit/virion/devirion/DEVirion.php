@@ -50,6 +50,10 @@ class DEVirion extends PluginBase{
 		if(count($this->classLoader->getKnownAntigens()) > 0){
 			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DeVirion on production servers!!");
 			$this->classLoader->register(true);
+			$size = $this->getServer()->getScheduler()->getAsyncTaskPoolSize();
+			for($i = 0; $i < $size; $i++){
+				$this->getServer()->getScheduler()->scheduleAsyncTaskToWorker(new RegisterClassLoaderAsyncTask($this->classLoader), $i);
+			}
 			$this->getServer()->getScheduler()->scheduleRepeatingTask(new class($this) extends PluginTask{
 				public function onRun($currentTick){
 					/** @var DEVirion $owner */
