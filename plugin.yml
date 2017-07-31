@@ -2,6 +2,6 @@ name: DEVirion
 author: poggit
 authors: [SOFe]
 main: poggit\virion\devirion\DEVirion
-version: 1.0.0
+version: 1.1.0
 api:
 - 3.0.0-ALPHA7

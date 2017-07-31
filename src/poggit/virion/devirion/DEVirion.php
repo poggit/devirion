@@ -28,24 +28,33 @@ class DEVirion extends PluginBase{
 	private $classLoader;
 
 	public function onEnable(){
-		$dir = $this->getServer()->getDataPath() . "virions/";
-
-		if(!is_dir($dir)){
-			mkdir($dir);
-		}
 		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
-		$directory = dir($dir);
-		while(is_string($file = $directory->read())){
-			if(is_dir($dir . $file) and $file !== "." and $file !== ".."){
-				$path = $dir . rtrim($file, "\\/") . "/";
-			}elseif(is_file($dir . $file) && substr($file, -5) === ".phar"){
-				$path = "phar://" . trim(str_replace(DIRECTORY_SEPARATOR, "/", realpath($dir . $file)), "/") . "/";
-			}else{
-				continue;
-			}
-			$this->loadVirion($path);
+
+		$dirs = [$this->getServer()->getDataPath() . "virions/"];
+		foreach((array) (getopt("", ["load-virions::"])["load-virions"] ?? []) as $path){
+			$dirs[] = $path;
 		}
-		$directory->close();
+		foreach($dirs as $dir){
+			if(!is_dir($dir)){
+				mkdir($dir);
+			}
+			$directory = dir($dir);
+			while(is_string($file = $directory->read())){
+				if(is_dir($dir . $file) and $file !== "." and $file !== ".."){
+					$path = $dir . rtrim($file, "\\/") . "/";
+				}elseif(is_file($dir . $file) && substr($file, -5) === ".phar"){
+					$path = "phar://" . trim(str_replace(DIRECTORY_SEPARATOR, "/", realpath($dir . $file)), "/") . "/";
+				}else{
+					continue;
+				}
+				$this->loadVirion($path);
+			}
+			$directory->close();
+		}
+
+		foreach((array) (getopt("", ["load-virion::"])["load-virion"] ?? []) as $path){
+			$this->loadVirion($path, true);
+		}
 
 		if(count($this->classLoader->getKnownAntigens()) > 0){
 			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DeVirion on production servers!!");
@@ -67,9 +76,11 @@ class DEVirion extends PluginBase{
 		}
 	}
 
-	public function loadVirion(string $path){
+	public function loadVirion(string $path, bool $explicit = false){
 		if(!is_file($path . "virion.yml")){
-//			$this->getLogger()->error("Cannot load virion: .poggit.yml missing");
+			if($explicit){
+				$this->getLogger()->error("Cannot load virion: virion.yml missing");
+			}
 			return;
 		}
 		$data = yaml_parse(file_get_contents($path . "virion.yml"));
