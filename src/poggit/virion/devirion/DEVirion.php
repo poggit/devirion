@@ -55,7 +55,7 @@ class DEVirion extends PluginBase{
 				$this->getServer()->getScheduler()->scheduleAsyncTaskToWorker(new RegisterClassLoaderAsyncTask($this->classLoader), $i);
 			}
 			$this->getServer()->getScheduler()->scheduleRepeatingTask(new class($this) extends PluginTask{
-				public function onRun($currentTick){
+				public function onRun(int $currentTick){
 					/** @var DEVirion $owner */
 					$owner = $this->getOwner();
 					$messages = $owner->getVirionClassLoader()->getMessages();
