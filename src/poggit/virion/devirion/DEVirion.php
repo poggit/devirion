@@ -27,7 +27,10 @@ class DEVirion extends PluginBase{
 	/** @var VirionClassLoader */
 	private $classLoader;
 
-	public function onEnable(){
+	/**
+	 * Called when the plugin is loaded, before calling onEnable()
+	 */
+	public function onLoad(){
 		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
 
 		$dirs = [$this->getServer()->getDataPath() . "virions/"];
@@ -57,18 +60,26 @@ class DEVirion extends PluginBase{
 		}
 
 		if(count($this->classLoader->getKnownAntigens()) > 0){
-			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DeVirion on production servers!!");
+			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DEVirion on production servers!!");
 			$this->classLoader->register(true);
 			$size = $this->getServer()->getScheduler()->getAsyncTaskPoolSize();
 			for($i = 0; $i < $size; $i++){
 				$this->getServer()->getScheduler()->scheduleAsyncTaskToWorker(new RegisterClassLoaderAsyncTask($this->classLoader), $i);
 			}
+		}
+	}
+
+	/**
+	 * Calling RepeatingTask after onLoad() to prevent issues with "Task when not enabled"
+	 */
+	public function onEnable(){
+		if(count($this->classLoader->getKnownAntigens()) > 0){
 			$this->getServer()->getScheduler()->scheduleRepeatingTask(new class($this) extends PluginTask{
 				public function onRun(int $currentTick){
 					/** @var DEVirion $owner */
 					$owner = $this->getOwner();
 					$messages = $owner->getVirionClassLoader()->getMessages();
-					while($messages->count() > 0){
+					while ($messages->count() > 0){
 						$owner->getLogger()->warning($messages->shift());
 					}
 				}
