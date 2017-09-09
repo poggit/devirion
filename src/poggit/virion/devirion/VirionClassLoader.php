@@ -30,7 +30,7 @@ class VirionClassLoader extends \BaseClassLoader{
 
 	public function __construct(ClassLoader $parent = null){
 		parent::__construct($parent);
-		$this->messages = new \Threaded();
+		$this->messages = new \Threaded;
 		$this->antigenMap = new \Threaded;
 		$this->mappedClasses = new \Threaded;
 	}
