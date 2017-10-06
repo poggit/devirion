@@ -39,7 +39,7 @@ class DEVirion extends PluginBase{
 		}
 		foreach($dirs as $dir){
 			if(!is_dir($dir)){
-				mkdir($dir);
+				@mkdir($dir);
 			}
 			$directory = dir($dir);
 			while(is_string($file = $directory->read())){
