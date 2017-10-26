@@ -2,8 +2,9 @@ name: DEVirion
 author: poggit
 authors: [SOFe]
 main: poggit\virion\devirion\DEVirion
-version: 1.2.2
+version: 1.2.2-a9
 api:
 - 3.0.0-ALPHA7
 - 3.0.0-ALPHA8
+- 3.0.0-ALPHA9
 load: STARTUP
