@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * devirion
  *
@@ -21,7 +23,30 @@
 namespace poggit\virion\devirion;
 
 use pocketmine\plugin\PluginBase;
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
+use function array_map;
+use function array_merge;
+use function array_pad;
+use function count;
+use function dir;
+use function explode;
+use function file_get_contents;
+use function getopt;
+use function implode;
+use function is_array;
+use function is_dir;
+use function is_file;
+use function is_string;
+use function mkdir;
+use function realpath;
+use function rtrim;
+use function str_replace;
+use function strtoupper;
+use function substr;
+use function trim;
+use function yaml_parse;
+use const PHP_MAJOR_VERSION;
+use const PHP_MINOR_VERSION;
 
 class DEVirion extends PluginBase{
 	/** @var VirionClassLoader */
@@ -30,7 +55,7 @@ class DEVirion extends PluginBase{
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
 	 */
-	public function onLoad(){
+	public function onLoad() : void{
 		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
 
 		$dirs = [$this->getServer()->getDataPath() . "virions/"];
@@ -62,9 +87,9 @@ class DEVirion extends PluginBase{
 		if(count($this->classLoader->getKnownAntigens()) > 0){
 			$this->getLogger()->warning("Virions should be bundled into plugins, not redistributed separately! Do NOT use DEVirion on production servers!!");
 			$this->classLoader->register(true);
-			$size = $this->getServer()->getScheduler()->getAsyncTaskPoolSize();
+			$size = $this->getServer()->getAsyncPool()->getSize();
 			for($i = 0; $i < $size; $i++){
-				$this->getServer()->getScheduler()->scheduleAsyncTaskToWorker(new RegisterClassLoaderAsyncTask($this->classLoader), $i);
+				$this->getServer()->getAsyncPool()->submitTaskToWorker(new RegisterClassLoaderAsyncTask($this->classLoader), $i);
 			}
 		}
 	}
@@ -72,22 +97,27 @@ class DEVirion extends PluginBase{
 	/**
 	 * Calling RepeatingTask after onLoad() to prevent issues with "Task when not enabled"
 	 */
-	public function onEnable(){
+	public function onEnable() : void{
 		if(count($this->classLoader->getKnownAntigens()) > 0){
-			$this->getServer()->getScheduler()->scheduleRepeatingTask(new class($this) extends PluginTask{
-				public function onRun(int $currentTick){
-					/** @var DEVirion $owner */
-					$owner = $this->getOwner();
-					$messages = $owner->getVirionClassLoader()->getMessages();
-					while ($messages->count() > 0){
-						$owner->getLogger()->warning($messages->shift());
+			$this->getScheduler()->scheduleRepeatingTask(new class($this) extends Task{
+				/** @var DEVirion */
+				private $plugin;
+
+				public function __construct(DEVirion $plugin){
+					$this->plugin = $plugin;
+				}
+
+				public function onRun(int $currentTick) : void{
+					$messages = $this->plugin->getVirionClassLoader()->getMessages();
+					while($messages->count() > 0){
+						$this->plugin->getLogger()->warning($messages->shift());
 					}
 				}
 			}, 1);
 		}
 	}
 
-	public function loadVirion(string $path, bool $explicit = false){
+	public function loadVirion(string $path, bool $explicit = false) : void{
 		if(!is_file($path . "virion.yml")){
 			if($explicit){
 				$this->getLogger()->error("Cannot load virion: virion.yml missing");
