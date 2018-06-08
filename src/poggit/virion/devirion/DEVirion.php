@@ -152,7 +152,7 @@ class DEVirion extends PluginBase{
 		}
 		if(isset($data["php"])){
 			foreach((array) $data["php"] as $php){
-				$parts = array_map("intval", array_pad(explode(".", $php), 2, "0"));
+				$parts = array_map("intval", array_pad(explode(".", (string) $php), 2, "0"));
 				if($parts[0] !== PHP_MAJOR_VERSION){
 					continue;
 				}
@@ -169,6 +169,7 @@ class DEVirion extends PluginBase{
 		if(isset($data["api"])){
 			$compatible = false;
 			foreach((array) $data["api"] as $version){
+				$version = (string) $version;
 				//Format: majorVersion.minorVersion.patch (3.0.0)
 				//    or: majorVersion.minorVersion.patch-devBuild (3.0.0-alpha1)
 				if($version !== $this->getServer()->getApiVersion()){
