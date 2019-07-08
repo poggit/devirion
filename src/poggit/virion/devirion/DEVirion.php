@@ -43,7 +43,6 @@ use function rtrim;
 use function str_replace;
 use function strtoupper;
 use function substr;
-use function trim;
 use function yaml_parse;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
@@ -71,7 +70,7 @@ class DEVirion extends PluginBase{
 				if(is_dir($dir . $file) and $file !== "." and $file !== ".."){
 					$path = $dir . rtrim($file, "\\/") . "/";
 				}elseif(is_file($dir . $file) && substr($file, -5) === ".phar"){
-					$path = "phar://" . trim(str_replace(DIRECTORY_SEPARATOR, "/", realpath($dir . $file)), "/") . "/";
+					$path = "phar://" . rtrim(str_replace(DIRECTORY_SEPARATOR, "/", realpath($dir . $file)), "/") . "/";
 				}else{
 					continue;
 				}
