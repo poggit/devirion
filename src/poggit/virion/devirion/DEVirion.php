@@ -106,7 +106,7 @@ class DEVirion extends PluginBase{
 					$this->plugin = $plugin;
 				}
 
-				public function onRun(int $currentTick) : void{
+				public function onRun() : void{
 					$messages = $this->plugin->getVirionClassLoader()->getMessages();
 					while($messages->count() > 0){
 						$this->plugin->getLogger()->warning($messages->shift());
