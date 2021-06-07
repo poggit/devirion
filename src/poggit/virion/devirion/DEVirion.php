@@ -55,7 +55,7 @@ class DEVirion extends PluginBase{
 	 * Called when the plugin is loaded, before calling onEnable()
 	 */
 	public function onLoad() : void{
-		$this->classLoader = new VirionClassLoader($this->getServer()->getLoader());
+		$this->classLoader = new VirionClassLoader();
 
 		$dirs = [$this->getServer()->getDataPath() . "virions/"];
 		foreach((array) (getopt("", ["load-virions::"])["load-virions"] ?? []) as $path){
