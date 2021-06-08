@@ -23,7 +23,6 @@ declare(strict_types=1);
 namespace poggit\virion\devirion;
 
 use BaseClassLoader;
-use ClassLoader;
 use Threaded;
 use function file_exists;
 use function str_replace;
@@ -39,8 +38,8 @@ class VirionClassLoader extends BaseClassLoader{
 	/** @var Threaded|string[] */
 	private $mappedClasses;
 
-	public function __construct(ClassLoader $parent = null){
-		parent::__construct($parent);
+	public function __construct(){
+		parent::__construct();
 		$this->messages = new Threaded;
 		$this->antigenMap = new Threaded;
 		$this->mappedClasses = new Threaded;
@@ -87,7 +86,7 @@ class VirionClassLoader extends BaseClassLoader{
 	public function loadClass($name) : ?bool{
 		try{
 			return parent::loadClass($name);
-		}catch(\ClassNotFoundException $e){
+		}catch(\Exception $e){
 			return null;
 		}
 	}
