@@ -98,7 +98,7 @@ switch(strtolower($args[1])){
 					$file = $src;
 				}else{
 					$file = $manifest . "/../";
-					if($src{0} === "/"){
+					if($src[0] === "/"){
 						if(strlen($projectPath = trim($project["path"], "/")) > 0){
 							$file .= $projectPath . "/";
 						}
