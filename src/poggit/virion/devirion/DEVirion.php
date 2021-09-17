@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace poggit\virion\devirion;
 
+use pocketmine\plugin\ApiVersion;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\Task;
 use function array_map;
@@ -41,7 +42,6 @@ use function mkdir;
 use function realpath;
 use function rtrim;
 use function str_replace;
-use function strtoupper;
 use function substr;
 use function yaml_parse;
 use const PHP_MAJOR_VERSION;
@@ -165,41 +165,10 @@ class DEVirion extends PluginBase{
 				return;
 			}
 		}
-		if(isset($data["api"])){
-			$compatible = false;
-			foreach((array) $data["api"] as $version){
-				$version = (string) $version;
-				//Format: majorVersion.minorVersion.patch (3.0.0)
-				//    or: majorVersion.minorVersion.patch-devBuild (3.0.0-alpha1)
-				if($version !== $this->getServer()->getApiVersion()){
-					$virionApi = array_pad(explode("-", $version), 2, ""); //0 = version, 1 = suffix (optional)
-					$serverApi = array_pad(explode("-", $this->getServer()->getApiVersion()), 2, "");
+		if(isset($data["api"]) && !ApiVersion::isCompatible($this->getServer()->getApiVersion(), (array) $data["api"])){
+			$this->getLogger()->error("Cannot load virion $name: Server has incompatible API version {$this->getServer()->getApiVersion()}");
+			return;
 
-					if(strtoupper($virionApi[1]) !== strtoupper($serverApi[1])){ //Different release phase (alpha vs. beta) or phase build (alpha.1 vs alpha.2)
-						continue;
-					}
-
-					$virionNumbers = array_map("intval", explode(".", $virionApi[0]));
-					$serverNumbers = array_map("intval", explode(".", $serverApi[0]));
-
-					if($virionNumbers[0] !== $serverNumbers[0]){ //Completely different API version
-						continue;
-					}
-
-					if($virionNumbers[1] > $serverNumbers[1]){ //If the plugin requires new API features, being backwards compatible
-						continue;
-					}
-				}
-
-				$compatible = true;
-				break;
-			}
-
-			if($compatible === false){
-				$this->getLogger()->error("Cannot load virion $name: Server has incompatible API version {$this->getServer()->getApiVersion()}");
-				return;
-
-			}
 		}
 
 		if(!isset($data["api"]) && !isset($data["php"])){
