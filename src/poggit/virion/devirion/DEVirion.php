@@ -42,7 +42,6 @@ use function mkdir;
 use function realpath;
 use function rtrim;
 use function str_replace;
-use function strtoupper;
 use function substr;
 use function yaml_parse;
 use const PHP_MAJOR_VERSION;
