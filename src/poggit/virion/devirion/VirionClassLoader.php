@@ -23,7 +23,7 @@ declare(strict_types=1);
 namespace poggit\virion\devirion;
 
 use BaseClassLoader;
-use Threaded;
+use ThreadedArray;
 use function file_exists;
 use function str_replace;
 use function stripos;
@@ -31,18 +31,19 @@ use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
 
 class VirionClassLoader extends BaseClassLoader{
-	private $messages;
+	/** @var ThreadedArray<string> */
+	private ThreadedArray$messages;
 
-	/** @var Threaded|string[] */
-	private $antigenMap;
-	/** @var Threaded|string[] */
-	private $mappedClasses;
+	/** @var ThreadedArray<string> */
+	private ThreadedArray $antigenMap;
+	/** @var ThreadedArray<string> */
+	private ThreadedArray $mappedClasses;
 
 	public function __construct(){
 		parent::__construct();
-		$this->messages = new Threaded;
-		$this->antigenMap = new Threaded;
-		$this->mappedClasses = new Threaded;
+		$this->messages = new ThreadedArray;
+		$this->antigenMap = new ThreadedArray;
+		$this->mappedClasses = new ThreadedArray;
 	}
 
 	public function addAntigen(string $antigen, string $path) : void{
@@ -57,7 +58,7 @@ class VirionClassLoader extends BaseClassLoader{
 		return $antigens;
 	}
 
-	public function findClass($class) : ?string{
+	public function findClass(string $class) : ?string{
 		$baseName = str_replace("\\", DIRECTORY_SEPARATOR, $class);
 		foreach($this->antigenMap as $path => $antigen){
 			if(stripos($class, $antigen) === 0){
@@ -83,10 +84,10 @@ class VirionClassLoader extends BaseClassLoader{
 		return null;
 	}
 
-	public function loadClass($name) : bool{
+	public function loadClass(string $name) : bool{
 		try{
 			return parent::loadClass($name);
-		}catch(\Exception $e){
+		}catch(\Exception){
 			return false;
 		}
 	}
@@ -95,7 +96,7 @@ class VirionClassLoader extends BaseClassLoader{
 		return $this->mappedClasses[$loadedClass] ?? null;
 	}
 
-	public function getMessages() : Threaded{
+	public function getMessages() : ThreadedArray{
 		return $this->messages;
 	}
 }

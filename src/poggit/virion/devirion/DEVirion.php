@@ -49,7 +49,7 @@ use const PHP_MINOR_VERSION;
 
 class DEVirion extends PluginBase{
 	/** @var VirionClassLoader */
-	private $classLoader;
+	private VirionClassLoader $classLoader;
 
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
