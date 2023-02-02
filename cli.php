@@ -92,7 +92,7 @@ switch(strtolower($args[1])){
 			}
 
 			$src = $lib["src"];
-			$vendor = strtolower($libDeclaration["vendor"] ?? "poggit-project");
+			$vendor = strtolower($lib["vendor"] ?? "poggit-project");
 			if($vendor === "raw"){
 				if(strpos($src, "http://") === 0 || strpos($src, "https://") === 0){
 					$file = $src;
@@ -122,7 +122,7 @@ switch(strtolower($args[1])){
 				$srcOwner = array_pop($srcParts) ?? $project->repo[0];
 
 				$version = $lib["version"] ?? "*";
-				$branch = $libDeclaration["branch"] ?? ":default";
+				$branch = $lib["branch"] ?? ":default";
 
 				$file = "https://poggit.pmmp.io/v.dl/$srcOwner/$srcRepo/" . urlencode($srcProject) . "/" . urlencode($version) . "?branch=" . urlencode($branch);
 			}
