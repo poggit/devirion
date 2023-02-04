@@ -26,7 +26,7 @@ use pocketmine\scheduler\AsyncTask;
 
 class RegisterClassLoaderAsyncTask extends AsyncTask{
 	/** @var VirionClassLoader */
-	private $classLoader;
+	private VirionClassLoader $classLoader;
 
 	public function __construct(VirionClassLoader $classLoader){
 		$this->classLoader = $classLoader;

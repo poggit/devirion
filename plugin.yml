@@ -4,5 +4,5 @@ authors: [SOFe]
 main: poggit\virion\devirion\DEVirion
 version: 1.2.5-ALPHA12
 api:
-- 4.0.0
+- 5.0.0
 load: STARTUP
