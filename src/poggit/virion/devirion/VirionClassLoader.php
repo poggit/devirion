@@ -32,7 +32,7 @@ use const PHP_INT_SIZE;
 
 class VirionClassLoader extends BaseClassLoader{
 	/** @var ThreadedArray<string> */
-	private ThreadedArray$messages;
+	private ThreadedArray $messages;
 
 	/** @var ThreadedArray<string> */
 	private ThreadedArray $antigenMap;
